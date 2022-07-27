@@ -15,20 +15,20 @@ executors:
 
 jobs: 
   build-frontend:
-  executor: docker-node-image
-  steps:
-    - checkout
-    - restore_cache:
-        keys: [frontend-build]
-    - run:
-        name: Build front-end
-        command: |
-          cd frontend
-          npm install
-          npm run build
-    - save_cache:
-        paths: [frontend/node_modules]
-        key: frontend-build
+    executor: docker-node-image
+    steps:
+      - checkout
+      - restore_cache:
+          keys: [frontend-build]
+      - run:
+          name: Build front-end
+          command: |
+            cd frontend
+            npm install
+            npm run build
+      - save_cache:
+          paths: [frontend/node_modules]
+          key: frontend-build
 workflows:
   default:
     jobs:
