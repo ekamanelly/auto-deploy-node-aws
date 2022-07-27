@@ -111,10 +111,11 @@ jobs:
       - restore_cache:
           keys: [frontend-build]
       - run: 
-          name: scan backend
+          name: scan frontend
           command: |
             cd frontend
             npm install           
+            npm audit fix
             npm audit fix --audit-level=critical --force
             npm audit --audit-level=critical
 
