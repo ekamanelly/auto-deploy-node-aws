@@ -10,7 +10,7 @@ executors:
   
   alpine-image:
     docker:
-      - image: alpine:late
+      - image: alpine:latest
 
 commands:
   destroy-environment:
