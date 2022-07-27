@@ -165,7 +165,28 @@ jobs:
           paths:
             - project/.circleci/ansible/inventory.txt
       - destroy-environment      
-      # Here's where you will add some code to rollback on failu                     
+      # Here's where you will add some code to rollback on failu    
+  configure-infrastructure:
+    executor: alpine-image
+      # Docker image here that supports Ansible
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints: ["0b:ec:d5:64:2d:e0:3b:ba:21:80:19:83:bd:6b:41:d9"]      
+      - attach_workspace:
+         at: ~/
+      - run:
+          command: |
+            apk add --update ansible tar gzip aws-cli
+      - run:
+          name: Configure server
+          command: |
+            cd .circleci/ansible
+            echo 'installing dependency...'
+            cat inventory.txt
+            ansible-playbook -i inventory.txt configure-server.yml               
+      - destroy_environment
+      # Here's where you will add some code to rollback on failure                          
 
 workflows:
   default:
@@ -185,8 +206,8 @@ workflows:
           filters:
             branches:
               only: [main]
-      # - configure-infrastructure:
-      #     requires: [deploy-infrastructure]
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
       # - run-migrations:
       #     requires: [configure-infrastructure]
       # - deploy-frontend:
