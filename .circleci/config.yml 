@@ -11,7 +11,7 @@ executors:
   
   alpine-image:
     docker:
-      - image: alpine:la
+      - image: alpine:latest
 
 jobs: 
   build-frontend:
