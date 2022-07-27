@@ -20,7 +20,7 @@ commands:
           name: Destroy environments
           when: on_fail
           command: |
-            aws s3 rb s3://udapeople-frontend-"${CIRCLE_WORKFLOW_ID:0:7}" --force
+            aws s3 rb "s3://udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" --force
             aws cloudformation delete-stack --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}
             aws cloudformation delete-stack --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}
 
@@ -148,7 +148,7 @@ jobs:
               --template-file .circleci/files/frontend.yml \
               --tags Name=frontend-infra \
               --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --parameter-overrides ID="udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}
+              --parameter-overrides ID="udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
       - run:
           name: Add back-end ip to ansible inventory
           command: |
