@@ -185,7 +185,7 @@ jobs:
             echo 'installing dependency...'
             cat inventory.txt
             ansible-playbook -i inventory.txt configure-server.yml               
-      - destroy_environment
+      - destroy-environment
       # Here's where you will add some code to rollback on failure                          
 
 workflows:
