@@ -193,7 +193,9 @@ jobs:
     steps:
       - checkout
       - add_ssh_keys:
-          fingerprints: ["0b:ec:d5:64:2d:e0:3b:ba:21:80:19:83:bd:6b:41:d9"]      
+          fingerprints:
+            - "0b:ec:d5:64:2d:e0:3b:ba:21:80:19:83:bd:6b:41:d9"
+            #  [0b:ec:d5:64:2d:e0:3b:ba:21:80:19:83:bd:6b:41:d9]      
       - attach_workspace:
          at: ~/
       - run:
@@ -273,7 +275,9 @@ jobs:
       - checkout
       # Add ssh keys with fingerprint
       - add_ssh_keys:
-          fingerprints: ["0b:ec:d5:64:2d:e0:3b:ba:21:80:19:83:bd:6b:41:d9"]         
+          fingerprints: 
+            - "0b:ec:d5:64:2d:e0:3b:ba:21:80:19:83:bd:6b:41:d9"
+          # ["0b:ec:d5:64:2d:e0:3b:ba:21:80:19:83:bd:6b:41:d9"]         
       # attach workspace
       - attach_workspace:
          at: ~/  
@@ -316,7 +320,7 @@ workflows:
           filters:
             branches:
               only: [main]
-      # - configure-infrastructure:
+      # - configure-infrastructure: 
       #     requires: [deploy-infrastructure]
       # - run-migrations:
       #     requires: [configure-infrastructure]
