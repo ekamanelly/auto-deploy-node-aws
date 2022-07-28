@@ -17,10 +17,10 @@ commands:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID. 
     steps:
       - run:
-          name: "empty bucket udapeople-${CIRCLE_WORKFLOW_ID:0:7}"
+          name: empty bucket udapeople-${CIRCLE_WORKFLOW_ID:0:7}
           when: on_fail
           command: |
-            # aws s3 rb "s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7}" --force
+            aws s3 rm s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID. 
     steps:
@@ -316,14 +316,14 @@ workflows:
           filters:
             branches:
               only: [main]
-      - configure-infrastructure:
-          requires: [deploy-infrastructure]
-      - run-migrations:
-          requires: [configure-infrastructure]
-      - deploy-frontend:
-          requires: [run-migrations]
-      - deploy-backend:
-          requires: [run-migrations]
+      # - configure-infrastructure:
+      #     requires: [deploy-infrastructure]
+      # - run-migrations:
+      #     requires: [configure-infrastructure]
+      # - deploy-frontend:
+      #     requires: [run-migrations]
+      # - deploy-backend:
+      #     requires: [run-migrations]
       # - smoke-test:
       #     requires: [deploy-backend, deploy-frontend]
       # - cloudfront-update:
