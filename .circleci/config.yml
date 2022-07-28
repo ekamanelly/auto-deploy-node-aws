@@ -127,70 +127,128 @@ jobs:
             npm install
             npm audit fix           
             npm audit fix --audit-level=critical --force
-            npm audit --audit-level=critical            
+            npm audit --audit-level=critical  
+
   deploy-infrastructure:
     executor: aws-cli-image
     steps:
-      - checkout
+      - checkout # Checkout code from git
       - run:
-          name: install tag and gzip
-          command: |
-             yum install -y tar gzip   
+          name: Install tar gzip
+          command: yum install -y tar gzip
       - run:
           name: Ensure back-end infrastructure exists
           command: |
             aws cloudformation deploy \
-              --template-file .circleci/files/backend.yml \
-              --tags Name="backend-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"
-              
+            --template-file .circleci/files/backend.yml \
+            --tags project=udapeople \
+            --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+            --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
       - run:
           name: Ensure front-end infrastructure exist
           command: |
             aws cloudformation deploy \
-              --template-file .circleci/files/frontend.yml \
-              --tags Name="frontend-infra-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"
+            --template-file .circleci/files/frontend.yml \
+            --tags project=udapeople \
+            --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
+            --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
       - run:
           name: Add back-end ip to ansible inventory
           command: |
             aws ec2 describe-instances \
-              --query 'Reservations[*].Instances[*].PublicIpAddress' \
-              --filters "Name=tag-value,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --output text >> .circleci/ansible/inventory.txt 
-      - run:
-          name: cat inventory file 
-          command: 
-               cat .circleci/ansible/inventory.txt      
+            --query 'Reservations[*].Instances[*].PublicIpAddress' \
+            --filters "Name=tag-value,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+            --output text >> .circleci/ansible/inventory.txt
       - persist_to_workspace:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
-      - destroy-environment      
-      # Here's where you will add some code to rollback on failu    
+      - notify_fail 
+      - destroy-environment # Here's where you will add some code to rollback on failure      
+
   configure-infrastructure:
-    executor: alpine-image
-      # Docker image here that supports Ansible
+    executor:  alpine-image
     steps:
-      - checkout
-      - add_ssh_keys:
-          fingerprints: ["0b:ec:d5:64:2d:e0:3b:ba:21:80:19:83:bd:6b:41:d9"]      
-      - attach_workspace:
-         at: ~/
+      - checkout # Checkout code from git
+      -  add_ssh_keys: # Add ssh keys with fingerprint
+          fingerprints:
+            - "0b:ec:d5:64:2d:e0:3b:ba:21:80:19:83:bd:6b:41:d9"
+      - attach_workspace:  # attach workspace
+          at: ~/
       - run:
+          name: Install dependencies
           command: |
-            apt add --update ansible tar gzip aws-cli
+            apk add --update ansible tar gzip aws-cli
       - run:
           name: Configure server
           command: |
             cd .circleci/ansible
-            echo 'installing dependency...'
             cat inventory.txt
-            ansible-playbook -i inventory.txt configure-server.yml               
-      - destroy-environment
-      # Here's where you will add some code to rollback on failure                          
+            ansible-playbook -i inventory.txt configure-server.yml
+      - destroy-environment  # Here's where you will add some code to rollback on failure                         
+  # deploy-infrastructure:
+  #   executor: aws-cli-image
+  #   steps:
+  #     - checkout
+  #     - run:
+  #         name: install tag and gzip
+  #         command: |
+  #            yum install -y tar gzip   
+  #     - run:
+  #         name: Ensure back-end infrastructure exists
+  #         command: |
+  #           aws cloudformation deploy \
+  #             --template-file .circleci/files/backend.yml \
+  #             --tags Name="backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+  #             --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+  #             --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"
+              
+  #     - run:
+  #         name: Ensure front-end infrastructure exist
+  #         command: |
+  #           aws cloudformation deploy \
+  #             --template-file .circleci/files/frontend.yml \
+  #             --tags Name="frontend-infra-${CIRCLE_WORKFLOW_ID:0:7}" \
+  #             --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
+  #             --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"
+  #     - run:
+  #         name: Add back-end ip to ansible inventory
+  #         command: |
+  #           aws ec2 describe-instances \
+  #             --query 'Reservations[*].Instances[*].PublicIpAddress' \
+  #             --filters "Name=tag-value,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+  #             --output text >> .circleci/ansible/inventory.txt 
+  #     - run:
+  #         name: cat inventory file 
+  #         command: 
+  #              cat .circleci/ansible/inventory.txt      
+  #     - persist_to_workspace:
+  #         root: ~/
+  #         paths:
+  #           - project/.circleci/ansible/inventory.txt
+  #     - destroy-environment      
+  #     # Here's where you will add some code to rollback on failu    
+  # configure-infrastructure:
+  #   executor: alpine-image
+  #     # Docker image here that supports Ansible
+  #   steps:
+  #     - checkout
+  #     - add_ssh_keys:
+  #         fingerprints: ["0b:ec:d5:64:2d:e0:3b:ba:21:80:19:83:bd:6b:41:d9"]      
+  #     - attach_workspace:
+  #        at: ~/
+  #     - run:
+  #         command: |
+  #           apk add --update ansible tar gzip aws-cli
+  #     - run:
+  #         name: Configure server
+  #         command: |
+  #           cd .circleci/ansible
+  #           echo 'installing dependency...'
+  #           cat inventory.txt
+  #           ansible-playbook -i inventory.txt configure-server.yml               
+  #     - destroy-environment
+  #     # Here's where you will add some code to rollback on failure                          
 
 workflows:
   default:
