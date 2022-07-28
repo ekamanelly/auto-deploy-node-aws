@@ -270,7 +270,7 @@ jobs:
       # Checkout code from git
       - checkout
       # Add ssh keys with fingerprint
-      # - prepare_aws_cli
+      - prepare_aws_cli
       - add_ssh_keys:
           fingerprints: 
             - "01:f3:2a:fe:24:14:c8:19:a0:d1:11:ad:4a:3a:12:00"
