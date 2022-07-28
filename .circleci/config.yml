@@ -263,31 +263,25 @@ jobs:
       # Here's where you will add some code to rollback on failure 
       - empty-bucket
       - destroy-environment  
+
   deploy-backend:
-    executor: docker-node-image
+    docker:
+    - image: circleci/node:13.8.0
       # Docker image here that supports Ansible
     steps:
       # Checkout code from git
       - checkout
       # Add ssh keys with fingerprint
-      - prepare_aws_cli
       - add_ssh_keys:
-          fingerprints: 
-            - "01:f3:2a:fe:24:14:c8:19:a0:d1:11:ad:4a:3a:12:00"
-          # ["01:f3:2a:fe:24:14:c8:19:a0:d1:11:ad:4a:3a:12:00"]         
+          fingerprints: ["36:4a:1d:2d:8b:db:e2:c6:ba:31:85:03:de:fb:02:5c"]         
       # attach workspace
-      - attach_workspace:  # attach workspace
-          at: ~/
+      - attach_workspace:
+         at: ~/  
+      - prepare_aws_env
       - run:
-          name: Install dependencies
+          name: install ansible
           command: |
-            apk add --update ansible tar gzip aws-cli      
-      # - attach_workspace:
-      #    at: ~/  
-      # - run:
-      #     name: install ansible
-      #     command: |
-      #        sudo apt install -y ansible 
+             sudo apt install -y ansible 
       - run:
           name: Deploy backend
           command: |
@@ -302,8 +296,7 @@ jobs:
               cat inventory.txt
               ansible-playbook -i inventory.txt deploy-backend.yml
       # Here's where you will add some code to rollback on failure 
-      - empty-bucket
-      - destroy-environment            
+      - destroy_environment          
 workflows:
   default:
     jobs:
