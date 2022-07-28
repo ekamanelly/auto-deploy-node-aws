@@ -336,18 +336,24 @@ jobs:
       # Checkout code from git
       - checkout
       # Add ssh keys with fingerprint
+      # - prepare_aws_cli
       - add_ssh_keys:
           fingerprints: 
             - "01:f3:2a:fe:24:14:c8:19:a0:d1:11:ad:4a:3a:12:00"
           # ["01:f3:2a:fe:24:14:c8:19:a0:d1:11:ad:4a:3a:12:00"]         
       # attach workspace
-      - attach_workspace:
-         at: ~/  
-      - prepare_aws_cli
+      - attach_workspace:  # attach workspace
+          at: ~/
       - run:
-          name: install ansible
+          name: Install dependencies
           command: |
-             sudo apt install -y ansible 
+            apk add --update ansible tar gzip aws-cli      
+      # - attach_workspace:
+      #    at: ~/  
+      # - run:
+      #     name: install ansible
+      #     command: |
+      #        sudo apt install -y ansible 
       - run:
           name: Deploy backend
           command: |
@@ -382,8 +388,8 @@ workflows:
           filters:
             branches:
               only: [main]
-      # - configure-infrastructure: 
-      #     requires: [deploy-infrastructure]
+      - configure-infrastructure: 
+          requires: [deploy-infrastructure]
       # - run-migrations:
       #     requires: [configure-infrastructure]
       # - deploy-frontend:
