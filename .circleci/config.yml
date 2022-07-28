@@ -181,7 +181,7 @@ jobs:
          at: ~/
       - run:
           command: |
-            apk add --update ansible tar gzip aws-cli
+            apt add --update ansible tar gzip aws-cli
       - run:
           name: Configure server
           command: |
