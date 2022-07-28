@@ -277,7 +277,8 @@ jobs:
       # attach workspace
       - attach_workspace:
          at: ~/  
-      - prepare_aws_env
+      - prepare_aws_cli
+
       - run:
           name: install ansible
           command: |
