@@ -273,16 +273,20 @@ jobs:
       - checkout
       # Add ssh keys with fingerprint
       - add_ssh_keys:
-          fingerprints: ["36:4a:1d:2d:8b:db:e2:c6:ba:31:85:03:de:fb:02:5c"]         
+          name: ssh key
+          fingerprints:
+          - "01:f3:2a:fe:24:14:c8:19:a0:d1:11:ad:4a:3a:12:00"         
       # attach workspace
       - attach_workspace:
          at: ~/  
-      - prepare_aws_cli
-
-      - run:
-          name: install ansible
+      - run: 
+          name: install dependency...'
           command: |
-             sudo apt install -y ansible 
+            sudo apt install -y tar gzip ansible 
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install 
+
       - run:
           name: Deploy backend
           command: |
