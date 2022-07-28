@@ -23,7 +23,16 @@ commands:
           command: |
             aws cloudformation delete-stack --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}
             aws cloudformation delete-stack --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}
-
+  prepare_aws_cli:
+    description: aws cli 
+    steps:
+      - run:
+          name: install dependency...'
+          command: |
+            sudo apt install -y tar gzip
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install 
 #   revert-migrations:
 #     description: Revert the last migration if successfully run in the current workflow.
 #     parameters:
@@ -199,13 +208,8 @@ jobs:
       - checkout
       - restore_cache:
           keys: [backend-build]
-      - run:
-          name: Install dependencies
-          command: |
-            sudo apt install -y tar gzip
-            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-            unzip awscliv2.zip
-            sudo ./aws/install     
+      - prepare_aws_cli
+              
       - run:
           name: Run migrations
           command: |
@@ -221,7 +225,37 @@ jobs:
                 curl  -k https://kvdb.io/A5TFMALrhCcaW2aKmV7FtK/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
               fi
        # Here's where you will add some code to rollback on failure  
-      - destroy-environment 
+      # - destroy-environment 
+
+
+  deploy-frontend:
+    executor: docker-node-image
+      # Docker image here that supports AWS CLI
+    steps:
+      # Checkout code from git
+      - checkout
+      - prepare_aws_cli
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Get backend url
+          command: |  
+            export backend_ip=$(cat .circleci/ansible/inventory.txt| head -2 | tail -1)
+            echo $backend_ip
+            export API_URL="http://${backend_ip}:3030"
+            echo "API_URL = ${API_URL}"
+            echo API_URL="http://${backend_ip}:3030" >> frontend/.env
+            cat frontend/.env
+      - run:
+          name: Deploy frontend objects
+          command: |
+            cd frontend
+            npm install
+            npm run build
+            tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
+            aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
+      # Here's where you will add some code to rollback on failure 
+      - destroy_environment        
 workflows:
   default:
     jobs:
