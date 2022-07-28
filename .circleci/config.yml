@@ -234,35 +234,35 @@ jobs:
       - destroy-environment 
 
 
-  # deploy-frontend:
-  #   executor: docker-node-image
-  #     # Docker image here that supports AWS CLI
-  #   steps:
-  #     # Checkout code from git
-  #     - checkout
-  #     - prepare_aws_cli
-  #     - attach_workspace:
-  #         at: ~/
-  #     - run:
-  #         name: Get backend url
-  #         command: |  
-  #           export backend_ip=$(cat .circleci/ansible/inventory.txt| head -2 | tail -1)
-  #           echo $backend_ip
-  #           export API_URL="http://${backend_ip}:3030"
-  #           echo "API_URL = ${API_URL}"
-  #           echo API_URL="http://${backend_ip}:3030" >> frontend/.env
-  #           cat frontend/.env
-  #     - run:
-  #         name: Deploy frontend objects
-  #         command: |
-  #           cd frontend
-  #           npm install
-  #           npm run build
-  #           tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
-  #           aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
-  #     # Here's where you will add some code to rollback on failure 
-  #     - empty-bucket
-  #     - destroy-environment  
+  deploy-frontend:
+    executor: docker-node-image
+      # Docker image here that supports AWS CLI
+    steps:
+      # Checkout code from git
+      - checkout
+      - prepare_aws_cli
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Get backend url
+          command: |  
+            export backend_ip=$(cat .circleci/ansible/inventory.txt| head -2 | tail -1)
+            echo $backend_ip
+            export API_URL="http://${backend_ip}:3030"
+            echo "API_URL = ${API_URL}"
+            echo API_URL="http://${backend_ip}:3030" >> frontend/.env
+            cat frontend/.env
+      - run:
+          name: Deploy frontend objects
+          command: |
+            cd frontend
+            npm install
+            npm run build
+            tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
+            aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
+      # Here's where you will add some code to rollback on failure 
+      - empty-bucket
+      - destroy-environment  
   deploy-backend:
     executor: docker-node-image
       # Docker image here that supports Ansible
@@ -326,8 +326,8 @@ workflows:
           requires: [deploy-infrastructure]
       - run-migrations:
           requires: [configure-infrastructure]
-      # - deploy-frontend:
-      #     requires: [run-migrations]
+      - deploy-frontend:
+          requires: [run-migrations]
       - deploy-backend:
           requires: [run-migrations]
       # - smoke-test:
