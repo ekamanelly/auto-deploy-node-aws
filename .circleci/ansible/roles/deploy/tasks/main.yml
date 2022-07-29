@@ -9,10 +9,10 @@
     src: ~/project/artifact.tar.gz
     dest: ./artifact.tar.gz
 
-- name: "extract the zipped artifact"
-  become: true  
-  shell: | 
-    tar xzvf artifact.tar.gz 
+# - name: "extract the zipped artifact"
+#   become: true  
+#   shell: | 
+#     tar xzvf artifact.tar.gz 
 
 
 # - name : "start server"    
